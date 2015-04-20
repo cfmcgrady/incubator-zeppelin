@@ -51,6 +51,7 @@ public class HDFSNotebookRepo implements NotebookRepo {
 
   public HDFSNotebookRepo(ZeppelinConfiguration conf, URI filesystemRoot) throws IOException {
     this.conf = conf;
+    this.filesystemRoot = filesystemRoot;
     if (filesystemRoot.getScheme().equalsIgnoreCase("hdfs")) {
       Configuration configuration = new Configuration();
 
@@ -148,7 +149,6 @@ public class HDFSNotebookRepo implements NotebookRepo {
   }
 
   private Path getRootDir() throws IOException {
-    //FileStatus rootDir = this.fs.getFileStatus(new Path(getPath("/")));
     Path rootDir = new Path(filesystemRoot);
 
     if (!fs.exists(rootDir)) {

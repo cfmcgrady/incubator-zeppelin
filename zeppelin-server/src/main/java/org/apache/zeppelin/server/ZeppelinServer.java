@@ -309,8 +309,11 @@ public class ZeppelinServer extends Application {
     notebook = new Notebook(conf, notebookRepo, schedulerFactory, replFactory, notebookServer);
   }
 
-  private NotebookRepo setUpNotebookRepo(ZeppelinConfiguration conf, URI notebookDir) throws IOException{
-    if (notebookDir.getScheme().equalsIgnoreCase("hdfs")) {
+  private NotebookRepo setUpNotebookRepo(ZeppelinConfiguration conf, 
+                                         URI notebookDir) throws IOException{
+    String scheme = notebookDir.getScheme();
+    LOG.info("using notebookdir: " + notebookDir.toString());
+    if (scheme != null && scheme.equalsIgnoreCase("hdfs")) {
       return new HDFSNotebookRepo(conf, notebookDir);
     } else {
       return new VFSNotebookRepo(conf, notebookDir);
