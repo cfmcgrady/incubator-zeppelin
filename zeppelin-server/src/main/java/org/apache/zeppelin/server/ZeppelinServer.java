@@ -33,6 +33,8 @@ import org.apache.zeppelin.conf.ZeppelinConfiguration;
 import org.apache.zeppelin.conf.ZeppelinConfiguration.ConfVars;
 import org.apache.zeppelin.interpreter.InterpreterFactory;
 import org.apache.zeppelin.notebook.Notebook;
+import org.apache.zeppelin.notebook.repo.HDFSNotebookRepo;
+import org.apache.zeppelin.notebook.repo.NotebookRepo;
 import org.apache.zeppelin.notebook.repo.VFSNotebookRepo;
 import org.apache.zeppelin.rest.InterpreterRestApi;
 import org.apache.zeppelin.rest.NotebookRestApi;
@@ -73,7 +75,7 @@ public class ZeppelinServer extends Application {
 
   private InterpreterFactory replFactory;
 
-  private VFSNotebookRepo notebookRepo;
+  private NotebookRepo notebookRepo;
 
   public static void main(String[] args) throws Exception {
     ZeppelinConfiguration conf = ZeppelinConfiguration.create();
@@ -302,7 +304,7 @@ public class ZeppelinServer extends Application {
     this.schedulerFactory = new SchedulerFactory();
     this.replFactory = new InterpreterFactory(conf);
 
-    this.notebookRepo = new VFSNotebookRepo(conf, new URI(conf.getNotebookDir()));
+    this.notebookRepo = new HDFSNotebookRepo(conf, new URI(conf.getNotebookDir()));
     notebook = new Notebook(conf, notebookRepo, schedulerFactory, replFactory, notebookServer);
   }
 
