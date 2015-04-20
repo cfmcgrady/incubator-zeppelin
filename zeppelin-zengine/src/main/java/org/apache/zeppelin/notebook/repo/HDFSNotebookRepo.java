@@ -20,7 +20,6 @@ package org.apache.zeppelin.notebook.repo;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.NameScope;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
 import org.apache.zeppelin.conf.ZeppelinConfiguration;
@@ -52,19 +51,19 @@ public class HDFSNotebookRepo implements NotebookRepo {
 
   public HDFSNotebookRepo(ZeppelinConfiguration conf, URI filesystemRoot) throws IOException {
     this.conf = conf;
+    if (filesystemRoot.getScheme().equalsIgnoreCase("hdfs")) {
+      Configuration configuration = new Configuration();
 
-    if (filesystemRoot.getScheme() == null) { // it is local path
-      try {
-        this.filesystemRoot = new URI(new File(
-            conf.getRelativeDir(filesystemRoot.getPath())).getAbsolutePath());
-      } catch (URISyntaxException e) {
-        throw new IOException(e);
+      // add hadoop config, so that we can visit hdfs using ha
+      String hadoopConfDir = conf.getString("HADOOP_CONF_DIR");
+      if (hadoopConfDir != null && !hadoopConfDir.equals("")) {
+        configuration.addResource(hadoopConfDir + "/core-site.xml");
+        configuration.addResource(hadoopConfDir + "/hdfs-site.xml");
       }
+      this.fs = FileSystem.get(filesystemRoot, configuration);
     } else {
-      this.filesystemRoot = filesystemRoot;
+      throw new IOException("unkonw uri scheme");
     }
-    Configuration configuration = new Configuration();
-    this.fs = FileSystem.get(filesystemRoot, configuration);
   }
 
   @Override

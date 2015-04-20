@@ -305,9 +305,16 @@ public class ZeppelinServer extends Application {
     this.schedulerFactory = new SchedulerFactory();
     this.replFactory = new InterpreterFactory(conf);
 
-    this.notebookRepo = 
-        new HDFSNotebookRepo(conf, new URI("hdfs://192.168.200.3:8020/user/fchen/notebook"));
+    this.notebookRepo = setUpNotebookRepo(conf, new URI(conf.getNotebookDir()));
     notebook = new Notebook(conf, notebookRepo, schedulerFactory, replFactory, notebookServer);
+  }
+
+  private NotebookRepo setUpNotebookRepo(ZeppelinConfiguration conf, URI notebookDir) throws IOException{
+    if (notebookDir.getScheme().equalsIgnoreCase("hdfs")) {
+      return new HDFSNotebookRepo(conf, notebookDir);
+    } else {
+      return new VFSNotebookRepo(conf, notebookDir);
+    }
   }
 
   @Override
