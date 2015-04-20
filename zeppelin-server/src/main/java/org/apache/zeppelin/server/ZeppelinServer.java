@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.net.URI;
 
@@ -304,7 +305,8 @@ public class ZeppelinServer extends Application {
     this.schedulerFactory = new SchedulerFactory();
     this.replFactory = new InterpreterFactory(conf);
 
-    this.notebookRepo = new HDFSNotebookRepo(conf, new URI(conf.getNotebookDir()));
+    this.notebookRepo = 
+        new HDFSNotebookRepo(conf, new URI("hdfs://192.168.200.3:8020/user/fchen/notebook"));
     notebook = new Notebook(conf, notebookRepo, schedulerFactory, replFactory, notebookServer);
   }
 

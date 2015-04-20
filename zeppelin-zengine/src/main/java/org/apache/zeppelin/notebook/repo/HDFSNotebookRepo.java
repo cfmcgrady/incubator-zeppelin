@@ -64,7 +64,7 @@ public class HDFSNotebookRepo implements NotebookRepo {
       this.filesystemRoot = filesystemRoot;
     }
     Configuration configuration = new Configuration();
-    this.fs = FileSystem.get(configuration);
+    this.fs = FileSystem.get(filesystemRoot, configuration);
   }
 
   @Override
@@ -150,7 +150,7 @@ public class HDFSNotebookRepo implements NotebookRepo {
 
   private Path getRootDir() throws IOException {
     //FileStatus rootDir = this.fs.getFileStatus(new Path(getPath("/")));
-    Path rootDir = new Path(filesystemRoot.getPath());
+    Path rootDir = new Path(filesystemRoot);
 
     if (!fs.exists(rootDir)) {
       throw new IOException("Root path does not exists");
@@ -175,7 +175,7 @@ public class HDFSNotebookRepo implements NotebookRepo {
     Path noteDir = new Path(rootDir.toUri() + Path.SEPARATOR + note.id());
 
     if (!fs.exists(noteDir)) {
-      fs.create(noteDir);
+      fs.mkdirs(noteDir);
     }
     if (!fs.isDirectory(noteDir)) {
       throw new IOException(noteDir.toString() + " is not a directory");
