@@ -67,17 +67,6 @@ public class HDFSNotebookRepo implements NotebookRepo {
     this.fs = FileSystem.get(configuration);
   }
 
-  private String getPath(String path) {
-    if (path == null || path.trim().length() == 0) {
-      return filesystemRoot.toString();
-    }
-    if (path.startsWith("/")) {
-      return filesystemRoot.toString() + path;
-    } else {
-      return filesystemRoot.toString() + "/" + path;
-    }
-  }
-
   @Override
   public List<NoteInfo> list() throws IOException {
     Path rootDir = getRootDir();
@@ -108,7 +97,7 @@ public class HDFSNotebookRepo implements NotebookRepo {
           infos.add(info);
         }
       } catch (IOException e) {
-        logger.error("Can't read note " + f.getPath().getName().toString(), e);
+        logger.error("Can't read note " + f.getPath().toString(), e);
       }
     }
 
@@ -117,10 +106,10 @@ public class HDFSNotebookRepo implements NotebookRepo {
 
   private Note getNote(Path noteDir) throws IOException {
     if (!fs.isDirectory(noteDir)) {
-      throw new IOException(noteDir.getName().toString() + " is not a directory");
+      throw new IOException(noteDir.toString() + " is not a directory");
     }
 
-    Path noteJson = new Path(noteDir.getName() + Path.SEPARATOR + NOTE_FILENAME);
+    Path noteJson = new Path(noteDir.toUri() + Path.SEPARATOR + NOTE_FILENAME);
     if (!fs.exists(noteJson)) {
       throw new IOException(noteJson.getName().toString() + " not found");
     }
@@ -154,14 +143,14 @@ public class HDFSNotebookRepo implements NotebookRepo {
   @Override
   public Note get(String noteId) throws IOException {
     Path rootDir = getRootDir();
-    Path noteDir = new Path(rootDir + Path.SEPARATOR + noteId);
+    Path noteDir = new Path(rootDir.toUri() + Path.SEPARATOR + noteId);
 
     return getNote(noteDir);
   }
 
   private Path getRootDir() throws IOException {
     //FileStatus rootDir = this.fs.getFileStatus(new Path(getPath("/")));
-    Path rootDir = new Path(getPath(filesystemRoot.getPath()));
+    Path rootDir = new Path(filesystemRoot.getPath());
 
     if (!fs.exists(rootDir)) {
       throw new IOException("Root path does not exists");
@@ -183,16 +172,16 @@ public class HDFSNotebookRepo implements NotebookRepo {
 
     Path rootDir = getRootDir();
 
-    Path noteDir = new Path(rootDir.getName() + Path.SEPARATOR + note.id());
+    Path noteDir = new Path(rootDir.toUri() + Path.SEPARATOR + note.id());
 
     if (!fs.exists(noteDir)) {
       fs.create(noteDir);
     }
     if (!fs.isDirectory(noteDir)) {
-      throw new IOException(noteDir.getName().toString() + " is not a directory");
+      throw new IOException(noteDir.toString() + " is not a directory");
     }
 
-    Path noteJson = new Path(noteDir.getName() + Path.SEPARATOR + "note.json");
+    Path noteJson = new Path(noteDir.toUri() + Path.SEPARATOR + NOTE_FILENAME);
     // true means not appending, creates file if not exists
     FSDataOutputStream os = fs.create(noteJson, true);
     BufferedWriter br = new BufferedWriter(new OutputStreamWriter(os,
@@ -206,7 +195,7 @@ public class HDFSNotebookRepo implements NotebookRepo {
   public void remove(String noteId) throws IOException {
     Path rootDir = getRootDir();
 
-    Path noteDir = new Path(rootDir.getName() + Path.SEPARATOR + noteId);
+    Path noteDir = new Path(rootDir.toUri() + Path.SEPARATOR + noteId);
 
     if (!fs.exists(noteDir)) {
       // nothing to do
@@ -215,7 +204,7 @@ public class HDFSNotebookRepo implements NotebookRepo {
 
     if (!fs.isDirectory(noteDir)) {
       // it is not look like zeppelin note savings
-      throw new IOException("Can not remove " + noteDir.getName().toString());
+      throw new IOException("Can not remove " + noteDir.toString());
     }
 
     // recursive delete
